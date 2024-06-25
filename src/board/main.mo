@@ -49,7 +49,7 @@ actor Board {
         logs := Array.append(logs, [(name, mood, caller, time)]);
         return;
     };
-
+    
     func _isAlive(p : Principal) : async Bool {
         // Creating the actor reference
         let userCanister = actor (Principal.toText(p)) : actor {
@@ -64,6 +64,15 @@ actor Board {
 
     // Check if the user has written on the board in the last 1 hour
     func _lastWritingTime(p : Principal) : ?Time {
+        for (log in logs.vals()) {
+            if (log.2 == p) {
+                return ?log.3;
+            };
+        };
+        return null;
+    };
+
+    public shared query func lastWritingTime(p : Principal) : async ?Time {
         for (log in logs.vals()) {
             if (log.2 == p) {
                 return ?log.3;

@@ -6,12 +6,13 @@ shared ({ caller = creator }) actor class UserCanister() = this {
     public type Mood = Text;
     public type Name = Text;
 
-    let name : Name = "Seb";
+    let name : Name = "Long";
     let owner : Principal = creator;
     let nanosecondsPerDay = 24 * 60 * 60 * 1_000_000_000;
 
     let board = actor ("pqmgt-myaaa-aaaaj-qa37q-cai") : actor {
         writeDailyCheck : (name : Name, mood : Mood) -> async ();
+        lastWritingTime : (owner : Principal) -> async ();
     };
 
     stable var alive : Bool = true;
@@ -38,6 +39,33 @@ shared ({ caller = creator }) actor class UserCanister() = this {
         // Write the daily check to the board
         try {
             await board.writeDailyCheck(name, mood);
+        } catch (e) {
+            throw e;
+        };
+    };
+
+   public shared ({ caller }) func lastWritingTime(
+   ) : async () {
+         assert (caller == owner);
+         alive := true;
+         latestPing := Time.now();
+    
+         // Write the daily check to the board
+         try {
+              await board.lastWritingTime(owner);
+         } catch (e) {
+              throw e;
+         };
+    };
+
+    public shared ({ caller }) func work() {
+        assert (caller == owner);
+        alive := true;
+        latestPing := Time.now();
+
+        // Write the daily check to the board
+        try {
+            await board.writeDailyCheck(name, "daily checking ✅");
         } catch (e) {
             throw e;
         };
